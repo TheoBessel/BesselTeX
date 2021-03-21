@@ -7,8 +7,8 @@
 \newif\if@contact \@contactfalse
 \DeclareOption{printable}{\@printabletrue}
 \DeclareOption{defsummary}{\@defsummarytrue}
-\DeclareOption{summary}{\@summaryfalse}
-\DeclareOption{contact}{\@contactfalse}
+\DeclareOption{summary}{\@summarytrue}
+\DeclareOption{contact}{\@contacttrue}
 \DeclareOption*{}
 \ProcessOptions
 \makeatother
@@ -441,7 +441,7 @@
 
 \makeatletter
 \title{\@titlenum \ifx&\@titletext& \else : \@titletext\fi}
-\titlegraphic{\includegraphics[width=4cm]{\@image}\\[12ex]}
+\titlegraphic{\includegraphics[width=3.5cm]{\@image}\\[12ex]}
 \makeatother
 
 \makeatletter
@@ -453,7 +453,7 @@
 			{\datefont \@date}\\[10ex]
 			\includegraphics[width=10cm]{\@image}\\[12ex]
 			\if@contact
-			{\datefont Contact : theo.bessel[at]etu.unistra.fr}
+			{\datefont Contact : \@mail}
 			\fi
 		\end{center}
 	\restoregeometry
@@ -475,8 +475,14 @@
 \makeatletter
 \@ifclassloaded{beamer}{
 	\makeatletter
+	\usepackage{etoolbox}
+
+	\expandafter\patchcmd\csname beamer@@tmpl@title page\endcsname{\insertinstitute}{\if@contact{Contact : \@mail\newline\newline}\fi \insertinstitute}{}{}
 	\newcommand{\image}[1]{
 		\def\@image{#1}
+	}
+	\newcommand{\mail}[1]{
+		\def\@mail{#1}
 	}
 	\newcommand{\titlenum}[1]{
 		\def\@titlenum{#1}
@@ -723,6 +729,9 @@
 	\makeatletter
 	\newcommand{\image}[1]{
 		\def\@image{#1}
+	}
+	\newcommand{\mail}[1]{
+		\def\@mail{#1}
 	}
 	\newcommand{\titlenum}[1]{
 		\def\@titlenum{#1}

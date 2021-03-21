@@ -1,0 +1,949 @@
+\ProvidesPackage{bessel}
+
+\makeatletter
+\newif\if@printable \@printablefalse
+\newif\if@defsummary \@defsummaryfalse
+\newif\if@summary \@summaryfalse
+\newif\if@contact \@contactfalse
+\DeclareOption{printable}{\@printabletrue}
+\DeclareOption{defsummary}{\@defsummarytrue}
+\DeclareOption{summary}{\@summaryfalse}
+\DeclareOption{contact}{\@contactfalse}
+\DeclareOption*{}
+\ProcessOptions
+\makeatother
+
+\makeatletter
+\@ifclassloaded{beamer}{
+	\typeout{this uses letter class}
+	\usepackage{physics}
+	\usepackage{tcolorbox}
+}{
+	\usepackage[hidelinks]{hyperref}
+	\usepackage{amsmath}
+	\usepackage{amssymb}
+	\usepackage{amsthm}
+	\usepackage{tcolorbox}
+	\usepackage{xcolor}
+	\usepackage{physics}
+	\usepackage{graphicx}
+	\usepackage{geometry}
+	\usepackage{mathrsfs}
+	\usepackage{fancyhdr}
+	\usepackage{nopageno}
+	\usepackage{mhchem}
+	\usepackage[siunitx]{circuitikz}
+	\usepackage{dsfont}
+
+	\usepackage{lipsum}
+	\usepackage{tikz}
+	\usepackage{tikz-cd}
+	\usepackage{dynkin-diagrams}
+	\usepackage{tocbasic}
+	\usepackage{pgfplots}
+	\usepackage{array}
+	\geometry{hmargin=1.5cm,vmargin=2cm,bottom=2cm,top=2.5cm}
+
+	\renewcommand{\headrulewidth}{2pt}
+	\renewcommand{\footrulewidth}{2pt}
+	\setlength{\headheight}{14pt}
+
+	\font\titlefont=cmr12 at 27pt
+	\font\authorfont=cmti12 at 20pt
+	\font\datefont=cmr12 at 16pt
+	\font\tocfont=cmr12 at 16pt
+	\font\minitocfont=cmr12 at 14pt
+	\font\miniit=cmti12 at 14pt
+
+	\DeclareTOCStyleEntry[
+	  level=0,
+	  beforeskip=1em plus 1pt,
+	  indent=20pt,
+	  numwidth=0pt,
+	  linefill=\dotfill,
+	  entryformat=\tocfont,
+	  pagenumberformat=\tocfont,
+	]{tocline}{sect}
+
+	\DeclareTOCStyleEntry[
+	  level=1,
+	  beforeskip=1em plus 1pt,
+	  indent=40pt,
+	  numwidth=0pt,
+	  linefill=\dotfill,
+	  entryformat=\tocfont,
+	  pagenumberformat=\tocfont,
+	]{tocline}{subsect}
+
+	\DeclareTOCStyleEntry[
+	  level=1,
+	  beforeskip=1em plus 1pt,
+	  indent=60pt,
+	  numwidth=0pt,
+	  linefill=\dotfill,
+	  entryformat=\minitocfont,
+	  pagenumberformat=\miniit,
+	]{tocline}{other}
+
+	\tcbuselibrary{skins,xparse}
+
+	\fancypagestyle{blankpage}{
+		\renewcommand{\headrulewidth}{0pt}
+		\renewcommand{\footrulewidth}{0pt}
+	   \fancyfoot[C]{\LARGE-\quad\thepage\quad-}
+	   \fancyhead[L]{}
+	   \fancyhead[R]{}
+	   \renewcommand{\contentsname}{\titlefont \@title }
+	}
+
+	\pgfplotsset{compat=1.3}
+
+
+}
+\makeatother
+
+
+
+
+
+\newcounter{thrm_ctr}
+\newcounter{prop_ctr}
+\newcounter{def_ctr}
+\newcounter{corol_ctr}
+\newcounter{demo_ctr}
+\newcounter{expl_ctr}
+\newcounter{exe_ctr}
+\newcounter{rmq_ctr}
+\newcounter{sect_ctr}
+\newcounter{subsect_ctr}
+
+\newcommand{\floor}[1]{\lfloor#1\rfloor}
+
+\newcommand{\Card}[1]{\mathrm{Card}(#1)}
+\newcommand{\Aut}[1]{\mathrm{Aut}(#1)}
+\newcommand{\Vect}[1]{\mathrm{Vect}(#1)}
+\newcommand{\Hom}[1]{\mathrm{Hom}(#1)}
+\newcommand{\Esc}[1]{\mathrm{Esc}(#1)}
+
+\newcommand{\Bo}[1]{\mathrm{B}(#1)}
+\newcommand{\Bf}[1]{\overline{\mathrm{B}}(#1)}
+\newcommand{\Sp}[1]{\mathrm{S}(#1)}
+
+\newcommand{\sge}[1]{\la #1\ra}
+\newcommand{\ord}[1]{\tta(#1)}
+
+\DeclareMathOperator{\void}{\varnothing}
+
+\DeclareMathOperator{\la}{\langle}
+\DeclareMathOperator{\ra}{\rangle}
+
+\DeclareMathOperator{\al}{\alpha}
+\DeclareMathOperator{\be}{\beta}
+\DeclareMathOperator{\ga}{\gamma}
+\DeclareMathOperator{\de}{\delta}
+\DeclareMathOperator{\eps}{\varepsilon}
+\DeclareMathOperator{\ze}{\zeta}
+\DeclareMathOperator{\tta}{\theta}
+\DeclareMathOperator{\io}{\iota}
+\DeclareMathOperator{\kp}{\kappa}
+\DeclareMathOperator{\lb}{\lambda}
+\DeclareMathOperator{\sig}{\sigma}
+\DeclareMathOperator{\ups}{\upsilon}
+\DeclareMathOperator{\vp}{\varphi}
+\DeclareMathOperator{\om}{\omega}
+
+\DeclareMathOperator{\Al}{\Alpha}
+\DeclareMathOperator{\Be}{\Beta}
+\DeclareMathOperator{\Ga}{\Gamma}
+\DeclareMathOperator{\De}{\Delta}
+\DeclareMathOperator{\Eps}{\Varepsilon}
+\DeclareMathOperator{\Ze}{\Zeta}
+\DeclareMathOperator{\Tta}{\Theta}
+\DeclareMathOperator{\Io}{\Iota}
+\DeclareMathOperator{\Kp}{\Kappa}
+\DeclareMathOperator{\Lb}{\Lambda}
+\DeclareMathOperator{\Sig}{\Sigma}
+\DeclareMathOperator{\Ups}{\Upsilon}
+\DeclareMathOperator{\Vp}{\Varphi}
+\DeclareMathOperator{\Om}{\Omega}
+
+\DeclareMathOperator{\ct}{\cdot}
+\DeclareMathOperator{\Id}{\mathrm{Id}}
+
+\DeclareMathOperator{\iA}{\textit{A}}
+\DeclareMathOperator{\iB}{\textit{B}}
+\DeclareMathOperator{\iC}{\textit{C}}
+\DeclareMathOperator{\iD}{\textit{D}}
+\DeclareMathOperator{\iE}{\textit{E}}
+\DeclareMathOperator{\iF}{\textit{F}}
+\DeclareMathOperator{\iG}{\textit{G}}
+\DeclareMathOperator{\iH}{\textit{H}}
+\DeclareMathOperator{\iI}{\textit{I}}
+\DeclareMathOperator{\iJ}{\textit{J}}
+\DeclareMathOperator{\iK}{\textit{K}}
+\DeclareMathOperator{\iL}{\textit{L}}
+\DeclareMathOperator{\iM}{\textit{M}}
+\DeclareMathOperator{\iN}{\textit{N}}
+\DeclareMathOperator{\iO}{\textit{O}}
+\DeclareMathOperator{\iP}{\textit{P}}
+\DeclareMathOperator{\iQ}{\textit{Q}}
+\DeclareMathOperator{\iR}{\textit{R}}
+\DeclareMathOperator{\iS}{\textit{S}}
+\DeclareMathOperator{\iT}{\textit{T}}
+\DeclareMathOperator{\iU}{\textit{U}}
+\DeclareMathOperator{\iV}{\textit{V}}
+\DeclareMathOperator{\iW}{\textit{W}}
+\DeclareMathOperator{\iX}{\textit{X}}
+\DeclareMathOperator{\iY}{\textit{Y}}
+\DeclareMathOperator{\iZ}{\textit{Z}}
+
+\DeclareMathOperator{\bA}{\mathbb{A}}
+\DeclareMathOperator{\bB}{\mathbb{B}}
+\DeclareMathOperator{\bC}{\mathbb{C}}
+\DeclareMathOperator{\bD}{\mathbb{D}}
+\DeclareMathOperator{\bE}{\mathbb{E}}
+\DeclareMathOperator{\bF}{\mathbb{F}}
+\DeclareMathOperator{\bG}{\mathbb{G}}
+\DeclareMathOperator{\bH}{\mathbb{H}}
+\DeclareMathOperator{\bI}{\mathbb{I}}
+\DeclareMathOperator{\bJ}{\mathbb{J}}
+\DeclareMathOperator{\bK}{\mathbb{K}}
+\DeclareMathOperator{\bL}{\mathbb{L}}
+\DeclareMathOperator{\bM}{\mathbb{M}}
+\DeclareMathOperator{\bN}{\mathbb{N}}
+\DeclareMathOperator{\bO}{\mathbb{O}}
+\DeclareMathOperator{\bP}{\mathbb{P}}
+\DeclareMathOperator{\bQ}{\mathbb{Q}}
+\DeclareMathOperator{\bR}{\mathbb{R}}
+\DeclareMathOperator{\bS}{\mathbb{S}}
+\DeclareMathOperator{\bT}{\mathbb{T}}
+\DeclareMathOperator{\bU}{\mathbb{U}}
+\DeclareMathOperator{\bV}{\mathbb{V}}
+\DeclareMathOperator{\bW}{\mathbb{W}}
+\DeclareMathOperator{\bX}{\mathbb{X}}
+\DeclareMathOperator{\bY}{\mathbb{Y}}
+\DeclareMathOperator{\bZ}{\mathbb{Z}}
+
+\DeclareMathOperator{\cA}{\mathcal{A}}
+\DeclareMathOperator{\cB}{\mathcal{B}}
+\DeclareMathOperator{\cC}{\mathcal{C}}
+\DeclareMathOperator{\cD}{\mathcal{D}}
+\DeclareMathOperator{\cE}{\mathcal{E}}
+\DeclareMathOperator{\cF}{\mathcal{F}}
+\DeclareMathOperator{\cG}{\mathcal{G}}
+\DeclareMathOperator{\cH}{\mathcal{H}}
+\DeclareMathOperator{\cI}{\mathcal{I}}
+\DeclareMathOperator{\cJ}{\mathcal{J}}
+\DeclareMathOperator{\cK}{\mathcal{K}}
+\DeclareMathOperator{\cL}{\mathcal{L}}
+\DeclareMathOperator{\cM}{\mathcal{M}}
+\DeclareMathOperator{\cN}{\mathcal{N}}
+\DeclareMathOperator{\cO}{\mathcal{O}}
+\DeclareMathOperator{\cP}{\mathcal{P}}
+\DeclareMathOperator{\cQ}{\mathcal{Q}}
+\DeclareMathOperator{\cR}{\mathcal{R}}
+\DeclareMathOperator{\cS}{\mathcal{S}}
+\DeclareMathOperator{\cT}{\mathcal{T}}
+\DeclareMathOperator{\cU}{\mathcal{U}}
+\DeclareMathOperator{\cV}{\mathcal{V}}
+\DeclareMathOperator{\cW}{\mathcal{W}}
+\DeclareMathOperator{\cX}{\mathcal{X}}
+\DeclareMathOperator{\cY}{\mathcal{Y}}
+\DeclareMathOperator{\cZ}{\mathcal{Z}}
+
+\DeclareMathOperator{\niA}{0_\textit{A}}
+\DeclareMathOperator{\niB}{0_\textit{B}}
+\DeclareMathOperator{\niC}{0_\textit{C}}
+\DeclareMathOperator{\niD}{0_\textit{D}}
+\DeclareMathOperator{\niE}{0_\textit{E}}
+\DeclareMathOperator{\niF}{0_\textit{F}}
+\DeclareMathOperator{\niG}{0_\textit{G}}
+\DeclareMathOperator{\niH}{0_\textit{H}}
+\DeclareMathOperator{\niI}{0_\textit{I}}
+\DeclareMathOperator{\niJ}{0_\textit{J}}
+\DeclareMathOperator{\niK}{0_\textit{K}}
+\DeclareMathOperator{\niL}{0_\textit{L}}
+\DeclareMathOperator{\niM}{0_\textit{M}}
+\DeclareMathOperator{\niN}{0_\textit{N}}
+\DeclareMathOperator{\niO}{0_\textit{O}}
+\DeclareMathOperator{\niP}{0_\textit{P}}
+\DeclareMathOperator{\niQ}{0_\textit{Q}}
+\DeclareMathOperator{\niR}{0_\textit{R}}
+\DeclareMathOperator{\niS}{0_\textit{S}}
+\DeclareMathOperator{\niT}{0_\textit{T}}
+\DeclareMathOperator{\niU}{0_\textit{U}}
+\DeclareMathOperator{\niV}{0_\textit{V}}
+\DeclareMathOperator{\niW}{0_\textit{W}}
+\DeclareMathOperator{\niX}{0_\textit{X}}
+\DeclareMathOperator{\niY}{0_\textit{Y}}
+\DeclareMathOperator{\niZ}{0_\textit{Z}}
+
+\DeclareMathOperator{\oiA}{1_\textit{A}}
+\DeclareMathOperator{\oiB}{1_\textit{B}}
+\DeclareMathOperator{\oiC}{1_\textit{C}}
+\DeclareMathOperator{\oiD}{1_\textit{D}}
+\DeclareMathOperator{\oiE}{1_\textit{E}}
+\DeclareMathOperator{\oiF}{1_\textit{F}}
+\DeclareMathOperator{\oiG}{1_\textit{G}}
+\DeclareMathOperator{\oiH}{1_\textit{H}}
+\DeclareMathOperator{\oiI}{1_\textit{I}}
+\DeclareMathOperator{\oiJ}{1_\textit{J}}
+\DeclareMathOperator{\oiK}{1_\textit{K}}
+\DeclareMathOperator{\oiL}{1_\textit{L}}
+\DeclareMathOperator{\oiM}{1_\textit{M}}
+\DeclareMathOperator{\oiN}{1_\textit{N}}
+\DeclareMathOperator{\oiO}{1_\textit{O}}
+\DeclareMathOperator{\oiP}{1_\textit{P}}
+\DeclareMathOperator{\oiQ}{1_\textit{Q}}
+\DeclareMathOperator{\oiR}{1_\textit{R}}
+\DeclareMathOperator{\oiS}{1_\textit{S}}
+\DeclareMathOperator{\oiT}{1_\textit{T}}
+\DeclareMathOperator{\oiU}{1_\textit{U}}
+\DeclareMathOperator{\oiV}{1_\textit{V}}
+\DeclareMathOperator{\oiW}{1_\textit{W}}
+\DeclareMathOperator{\oiX}{1_\textit{X}}
+\DeclareMathOperator{\oiY}{1_\textit{Y}}
+\DeclareMathOperator{\oiZ}{1_\textit{Z}}
+
+\DeclareMathOperator{\nbA}{0_\mathbb{A}}
+\DeclareMathOperator{\nbB}{0_\mathbb{B}}
+\DeclareMathOperator{\nbC}{0_\mathbb{C}}
+\DeclareMathOperator{\nbD}{0_\mathbb{D}}
+\DeclareMathOperator{\nbE}{0_\mathbb{E}}
+\DeclareMathOperator{\nbF}{0_\mathbb{F}}
+\DeclareMathOperator{\nbG}{0_\mathbb{G}}
+\DeclareMathOperator{\nbH}{0_\mathbb{H}}
+\DeclareMathOperator{\nbI}{0_\mathbb{I}}
+\DeclareMathOperator{\nbJ}{0_\mathbb{J}}
+\DeclareMathOperator{\nbK}{0_\mathbb{K}}
+\DeclareMathOperator{\nbL}{0_\mathbb{L}}
+\DeclareMathOperator{\nbM}{0_\mathbb{M}}
+\DeclareMathOperator{\nbN}{0_\mathbb{N}}
+\DeclareMathOperator{\nbO}{0_\mathbb{O}}
+\DeclareMathOperator{\nbP}{0_\mathbb{P}}
+\DeclareMathOperator{\nbQ}{0_\mathbb{Q}}
+\DeclareMathOperator{\nbR}{0_\mathbb{R}}
+\DeclareMathOperator{\nbS}{0_\mathbb{S}}
+\DeclareMathOperator{\nbT}{0_\mathbb{T}}
+\DeclareMathOperator{\nbU}{0_\mathbb{U}}
+\DeclareMathOperator{\nbV}{0_\mathbb{V}}
+\DeclareMathOperator{\nbW}{0_\mathbb{W}}
+\DeclareMathOperator{\nbX}{0_\mathbb{X}}
+\DeclareMathOperator{\nbY}{0_\mathbb{Y}}
+\DeclareMathOperator{\nbZ}{0_\mathbb{Z}}
+
+\DeclareMathOperator{\obA}{1_\mathbb{A}}
+\DeclareMathOperator{\obB}{1_\mathbb{B}}
+\DeclareMathOperator{\obC}{1_\mathbb{C}}
+\DeclareMathOperator{\obD}{1_\mathbb{D}}
+\DeclareMathOperator{\obE}{1_\mathbb{E}}
+\DeclareMathOperator{\obF}{1_\mathbb{F}}
+\DeclareMathOperator{\obG}{1_\mathbb{G}}
+\DeclareMathOperator{\obH}{1_\mathbb{H}}
+\DeclareMathOperator{\obI}{1_\mathbb{I}}
+\DeclareMathOperator{\obJ}{1_\mathbb{J}}
+\DeclareMathOperator{\obK}{1_\mathbb{K}}
+\DeclareMathOperator{\obL}{1_\mathbb{L}}
+\DeclareMathOperator{\obM}{1_\mathbb{M}}
+\DeclareMathOperator{\obN}{1_\mathbb{N}}
+\DeclareMathOperator{\obO}{1_\mathbb{O}}
+\DeclareMathOperator{\obP}{1_\mathbb{P}}
+\DeclareMathOperator{\obQ}{1_\mathbb{Q}}
+\DeclareMathOperator{\obR}{1_\mathbb{R}}
+\DeclareMathOperator{\obS}{1_\mathbb{S}}
+\DeclareMathOperator{\obT}{1_\mathbb{T}}
+\DeclareMathOperator{\obU}{1_\mathbb{U}}
+\DeclareMathOperator{\obV}{1_\mathbb{V}}
+\DeclareMathOperator{\obW}{1_\mathbb{W}}
+\DeclareMathOperator{\obX}{1_\mathbb{X}}
+\DeclareMathOperator{\obY}{1_\mathbb{Y}}
+\DeclareMathOperator{\obZ}{1_\mathbb{Z}}
+
+\DeclareMathOperator{\bfA}{\textbf{A}}
+\DeclareMathOperator{\bfB}{\textbf{B}}
+\DeclareMathOperator{\bfC}{\textbf{C}}
+\DeclareMathOperator{\bfD}{\textbf{D}}
+\DeclareMathOperator{\bfE}{\textbf{E}}
+\DeclareMathOperator{\bfF}{\textbf{F}}
+\DeclareMathOperator{\bfG}{\textbf{G}}
+\DeclareMathOperator{\bfH}{\textbf{H}}
+\DeclareMathOperator{\bfI}{\textbf{I}}
+\DeclareMathOperator{\bfJ}{\textbf{J}}
+\DeclareMathOperator{\bfK}{\textbf{K}}
+\DeclareMathOperator{\bfL}{\textbf{L}}
+\DeclareMathOperator{\bfM}{\textbf{M}}
+\DeclareMathOperator{\bfN}{\textbf{N}}
+\DeclareMathOperator{\bfO}{\textbf{O}}
+\DeclareMathOperator{\bfP}{\textbf{P}}
+\DeclareMathOperator{\bfQ}{\textbf{Q}}
+\DeclareMathOperator{\bfR}{\textbf{R}}
+\DeclareMathOperator{\bfS}{\textbf{S}}
+\DeclareMathOperator{\bfT}{\textbf{T}}
+\DeclareMathOperator{\bfU}{\textbf{U}}
+\DeclareMathOperator{\bfV}{\textbf{V}}
+\DeclareMathOperator{\bfW}{\textbf{W}}
+\DeclareMathOperator{\bfX}{\textbf{X}}
+\DeclareMathOperator{\bfY}{\textbf{Y}}
+\DeclareMathOperator{\bfZ}{\textbf{Z}}
+
+
+\DeclareMathOperator{\gG}{(\textit{G},\cdot)}
+\DeclareMathOperator{\gH}{(\textit{H},*)}
+
+\DeclareMathOperator{\mE}{(\textit{E},\textit{d})}
+
+%\DeclareMathOperator{\ind}{1\!\!1}%
+\DeclareMathOperator{\ind}{\mathds{1}}
+
+\DeclareMathOperator{\pgcd}{\wedge}
+\DeclareMathOperator{\ppcm}{\vee}
+
+\DeclareMathOperator{\et}{\ \mathrm{et}\ }
+\DeclareMathOperator{\ou}{\ \mathrm{ou}\ }
+\DeclareMathOperator{\casesi}{\ \mathrm{si}\ }
+
+\definecolor{lgreen}{RGB}{222,250,222}
+\definecolor{dgreen}{RGB}{67,152,103}
+
+\definecolor{lred}{RGB}{251,218,219}
+\definecolor{dred}{RGB}{187,27,27}
+
+\definecolor{lgray}{RGB}{192,192,192}
+\definecolor{dgray}{RGB}{105,105,105}
+
+\definecolor{lblue}{RGB}{169,187,225}
+\definecolor{dblue}{RGB}{69,99,162}
+
+
+
+\makeatletter
+\title{\@titlenum \ifx&\@titletext& \else : \@titletext\fi}
+\titlegraphic{\includegraphics[width=4cm]{\@image}\\[12ex]}
+\makeatother
+
+\makeatletter
+\renewcommand{\maketitle}{
+	\newgeometry{top=5cm,bottom=5cm}
+		\begin{center}
+			{\titlefont \@title }\\[4ex]
+			{\authorfont \@author}\\[4ex]
+			{\datefont \@date}\\[10ex]
+			\includegraphics[width=10cm]{\@image}\\[12ex]
+			\if@contact
+			{\datefont Contact : theo.bessel[at]etu.unistra.fr}
+			\fi
+		\end{center}
+	\restoregeometry
+	\setcounter{page}{1}
+	\pagestyle{fancy}
+	\fancyfoot[C]{\LARGE-\quad\thepage\quad-}
+	\fancyhead[L]{\Large \@titlenum}
+	\fancyhead[R]{\Large \@titletext}
+	\renewcommand{\contentsname}{\titlefont \@title }
+	\if@summary
+	\newpage
+	\tableofcontents
+	\fi
+	\newpage
+}
+\makeatother
+
+
+\makeatletter
+\@ifclassloaded{beamer}{
+	\makeatletter
+	\newcommand{\image}[1]{
+		\def\@image{#1}
+	}
+	\newcommand{\titlenum}[1]{
+		\def\@titlenum{#1}
+	}
+	\newcommand{\titletext}[1]{
+		\def\@titletext{#1}
+	}
+	\makeatother
+
+	\newcommand{\whitebox}[2]{
+		\begin{tcolorbox}
+		[
+			colback=lgray!10!white,
+			colframe=lgray,
+			colbacktitle=dgray!80!lgray,
+			boxrule=0.3mm,
+			arc=0.6mm,
+			grow to left by=0cm,
+			grow to right by=0cm,
+			title=#1,
+			fonttitle=\Large
+		]
+			#2
+		\end{tcolorbox}\quad\\
+	}
+
+	\newcommand{\graybox}[2]{
+		\begin{tcolorbox}
+		[
+			colback=lgray!20!white,
+			colframe=dgray,
+			colbacktitle=dgray!80!lgray,
+			boxrule=0.3mm,
+			arc=0.6mm,
+			grow to left by=0cm,
+			grow to right by=0cm,
+			title=#1,
+			fonttitle=\Large
+		]
+			#2
+		\end{tcolorbox}\quad\\
+	}
+
+	\if@printable
+		\newcommand{\rbox}[2]{
+			\graybox{#1}{#2}
+		}
+		\newcommand{\gbox}[2]{
+			\graybox{#1}{#2}
+		}
+		\newcommand{\bbox}[2]{
+			\graybox{#1}{#2}
+		}
+	\else
+		\newcommand{\rbox}[2]{
+			\begin{tcolorbox}
+			[
+				colback=lred,
+				colframe=dred,
+				colbacktitle=dred!80!lred,
+				boxrule=0.3mm,
+				arc=0.6mm,
+				grow to left by=0cm,
+				grow to right by=0cm,
+				title=#1,
+				fonttitle=\Large
+			]
+				#2
+			\end{tcolorbox}\quad\\
+		}
+
+		\newcommand{\gbox}[2]{
+			\begin{tcolorbox}
+			[
+				colback=lgreen,
+				colframe=dgreen,
+				colbacktitle=dgreen!80!lgreen,
+				boxrule=0.3mm,
+				arc=0.6mm,
+				grow to left by=0cm,
+				grow to right by=0cm,
+				title=#1,
+				fonttitle=\normalsize
+			]
+				#2
+			\end{tcolorbox}\quad\\
+		}
+
+		\newcommand{\bbox}[2]{
+			\begin{tcolorbox}
+			[
+				colback=lblue,
+				colframe=dblue,
+				colbacktitle=dblue!80!lblue,
+				boxrule=0.3mm,
+				arc=0.6mm,
+				grow to left by=0cm,
+				grow to right by=0cm,
+				title=#1,
+				fonttitle=\Large
+			]
+				#2
+			\end{tcolorbox}\quad\\
+		}
+	\fi
+	\makeatother
+
+	\newcommand{\imbox}[3]{
+		\tcbsidebyside
+		[
+			sidebyside adapt=left,
+			bicolor,
+			colback=white,
+			colbacklower=lgray,
+			colframe=dgray,
+			colbacktitle=dgray!80!lgray,
+			boxrule=0.3mm,
+			arc=0.6mm,
+			grow to left by=0cm,
+			grow to right by=0cm,
+			title=#1,
+			fonttitle=\Large,
+			lefthand ratio= 0.5
+		]{#2}{#3}\quad\\
+	}
+
+	\newcommand{\imtbox}[3]{
+		\tcbsidebyside
+		[
+			sidebyside adapt=left,
+			bicolor,
+			colback=white,
+			colbacklower=white,
+			colframe=dgray,
+			colbacktitle=dgray!80!lgray,
+			boxrule=0.3mm,
+			arc=0.6mm,
+			grow to left by=0cm,
+			grow to right by=0cm,
+			title=#1,
+			fonttitle=\Large,
+			lefthand ratio= 0.5
+		]{#2}{#3}\quad\\
+	}
+
+	\newcommand{\sect}[1]{
+		\addtocounter{sect_ctr}{1}
+		{\noindent\Huge\text{\arabic{sect_ctr} : #1}}\\ \\
+		\setcounter{subsect_ctr}{1}
+		\setcounter{thrm_ctr}{1}
+		\setcounter{prop_ctr}{1}
+		\setcounter{def_ctr}{1}
+		\setcounter{corol_ctr}{1}
+		\setcounter{demo_ctr}{1}
+		\setcounter{exe_ctr}{1}
+		\setcounter{expl_ctr}{1}
+		\setcounter{rmq_ctr}{1}
+		\addcontentsline{toc}{sect}{\arabic{sect_ctr} : #1}
+	}
+
+	\newcommand{\subsect}[1]{
+		{\quad\noindent\huge\text{\arabic{sect_ctr}.\arabic{subsect_ctr} : #1}}\\ \\
+		\setcounter{thrm_ctr}{1}
+		\setcounter{prop_ctr}{1}
+		\setcounter{def_ctr}{1}
+		\setcounter{corol_ctr}{1}
+		\setcounter{demo_ctr}{1}
+		\setcounter{exe_ctr}{1}
+		\setcounter{expl_ctr}{1}
+		\setcounter{rmq_ctr}{1}
+		\addtocounter{subsect_ctr}{1}
+		\addcontentsline{toc}{subsect}{\arabic{sect_ctr}.\arabic{subsect_ctr} : #1}
+	}
+
+	\newcommand{\tit}[1]{
+		{\large\text{#1}}\\ \\
+	}
+
+	\makeatletter
+	\newcommand{\thrm}[2]{
+		\bbox{Théorème \arabic{sect_ctr}.\arabic{subsect_ctr}.\arabic{thrm_ctr} : \ifx&#1& \else \textit{(#1)}\fi}{#2}
+		\if@defsummary
+		\addcontentsline{toc}{other}{\arabic{sect_ctr}.\arabic{subsect_ctr}.\arabic{thrm_ctr} Théorème : \ifx&#1& \else \miniit{(#1)}\fi}
+		\fi
+		\addtocounter{thrm_ctr}{1}
+	}
+
+	\newcommand{\prop}[2]{
+		\bbox{Proposition \arabic{sect_ctr}.\arabic{subsect_ctr}.\arabic{prop_ctr} : \ifx&#1& \else \textit{(#1)}\fi}{#2}
+		\if@defsummary
+		\addcontentsline{toc}{other}{\arabic{sect_ctr}.\arabic{subsect_ctr}.\arabic{prop_ctr} Propriété : \ifx&#1& \else \miniit{(#1)}\fi}
+		\fi
+		\addtocounter{prop_ctr}{1}
+	}
+
+	\newcommand{\corol}[2]{
+		\graybox{Corollaire \arabic{sect_ctr}.\arabic{subsect_ctr}.\arabic{corol_ctr} : \ifx&#1& \else \textit{(#1)}\fi}{#2}
+		\if@defsummary
+		\addcontentsline{toc}{other}{\arabic{sect_ctr}.\arabic{subsect_ctr}.\arabic{corol_ctr} Corollaire : \ifx&#1& \else \miniit{(#1)}\fi}
+		\fi
+		\addtocounter{corol_ctr}{1}
+	}
+
+	\newcommand{\expl}[2]{
+		\graybox{Exemple \arabic{sect_ctr}.\arabic{subsect_ctr}.\arabic{expl_ctr} : \ifx&#1& \else \textit{(#1)}\fi}{#2}
+		\if@defsummary
+		\addcontentsline{toc}{other}{\arabic{sect_ctr}.\arabic{subsect_ctr}.\arabic{expl_ctr} Exemple : \ifx&#1& \else \miniit{(#1)}\fi}
+		\fi
+		\addtocounter{expl_ctr}{1}
+	}
+
+	\newcommand{\exe}[2]{
+		\graybox{Exercice \arabic{sect_ctr}.\arabic{subsect_ctr}.\arabic{exe_ctr} : \ifx&#1& \else \textit{(#1)}\fi}{#2}
+		\if@defsummary
+		\addcontentsline{toc}{other}{\arabic{sect_ctr}.\arabic{subsect_ctr}.\arabic{exe_ctr} Exercice : \ifx&#1& \else \miniit{(#1)}\fi}
+		\fi
+		\addtocounter{exe_ctr}{1}
+	}
+
+	\newcommand{\rmq}[2]{
+		\graybox{Remarque \arabic{sect_ctr}.\arabic{subsect_ctr}.\arabic{rmq_ctr} : \ifx&#1& \else \textit{(#1)}\fi}{#2}
+		\if@defsummary
+		\addcontentsline{toc}{other}{\arabic{sect_ctr}.\arabic{subsect_ctr}.\arabic{rmq_ctr} Remarque : \ifx&#1& \else \miniit{(#1)}\fi}
+		\fi
+		\addtocounter{rmq_ctr}{1}
+	}
+
+	\newcommand{\demo}[2]{
+		\rbox{Démonstration \arabic{sect_ctr}.\arabic{subsect_ctr}.\arabic{demo_ctr} : \ifx&#1& \else \textit{(#1)}\fi}{#2 \qed}
+		\if@defsummary
+		\addcontentsline{toc}{other}{\arabic{sect_ctr}.\arabic{subsect_ctr}.\arabic{demo_ctr} Démonstration : \ifx&#1& \else \miniit{(#1)}\fi}
+		\fi
+		\addtocounter{demo_ctr}{1}
+	}
+
+	\newcommand{\defn}[2]{
+		\gbox{Définition \arabic{sect_ctr}.\arabic{subsect_ctr}.\arabic{def_ctr} : \ifx&#1& \else \textit{(#1)}\fi}{#2}
+		\if@defsummary
+		\addcontentsline{toc}{other}{\arabic{sect_ctr}.\arabic{subsect_ctr}.\arabic{def_ctr} Définition : \ifx&#1& \else \miniit{(#1)}\fi}
+		\fi
+		\addtocounter{def_ctr}{1}
+	}
+}{
+	\makeatletter
+	\newcommand{\image}[1]{
+		\def\@image{#1}
+	}
+	\newcommand{\titlenum}[1]{
+		\def\@titlenum{#1}
+	}
+	\newcommand{\titletext}[1]{
+		\def\@titletext{#1}
+	}
+	\makeatother
+
+	\newcommand{\whitebox}[2]{
+		\begin{tcolorbox}
+		[
+			colback=lgray!10!white,
+			colframe=lgray,
+			colbacktitle=dgray!80!lgray,
+			boxrule=0.3mm,
+			arc=0.6mm,
+			grow to left by=-1cm,
+			grow to right by=-1cm,
+			title=#1,
+			fonttitle=\Large
+		]
+			#2
+		\end{tcolorbox}\quad\\
+	}
+
+	\newcommand{\graybox}[2]{
+		\begin{tcolorbox}
+		[
+			colback=lgray!20!white,
+			colframe=dgray,
+			colbacktitle=dgray!80!lgray,
+			boxrule=0.3mm,
+			arc=0.6mm,
+			grow to left by=-1cm,
+			grow to right by=-1cm,
+			title=#1,
+			fonttitle=\Large
+		]
+			#2
+		\end{tcolorbox}\quad\\
+	}
+
+	\if@printable
+		\newcommand{\rbox}[2]{
+			\graybox{#1}{#2}
+		}
+		\newcommand{\gbox}[2]{
+			\graybox{#1}{#2}
+		}
+		\newcommand{\bbox}[2]{
+			\graybox{#1}{#2}
+		}
+	\else
+		\newcommand{\rbox}[2]{
+			\begin{tcolorbox}
+			[
+				colback=lred,
+				colframe=dred,
+				colbacktitle=dred!80!lred,
+				boxrule=0.3mm,
+				arc=0.6mm,
+				grow to left by=-1cm,
+				grow to right by=-1cm,
+				title=#1,
+				fonttitle=\Large
+			]
+				#2
+			\end{tcolorbox}\quad\\
+		}
+
+		\newcommand{\gbox}[2]{
+			\begin{tcolorbox}
+			[
+				colback=lgreen,
+				colframe=dgreen,
+				colbacktitle=dgreen!80!lgreen,
+				boxrule=0.3mm,
+				arc=0.6mm,
+				grow to left by=-1cm,
+				grow to right by=-1cm,
+				title=#1,
+				fonttitle=\Large
+			]
+				#2
+			\end{tcolorbox}\quad\\
+		}
+
+		\newcommand{\bbox}[2]{
+			\begin{tcolorbox}
+			[
+				colback=lblue,
+				colframe=dblue,
+				colbacktitle=dblue!80!lblue,
+				boxrule=0.3mm,
+				arc=0.6mm,
+				grow to left by=-1cm,
+				grow to right by=-1cm,
+				title=#1,
+				fonttitle=\Large
+			]
+				#2
+			\end{tcolorbox}\quad\\
+		}
+	\fi
+	\makeatother
+
+	\newcommand{\imbox}[3]{
+		\tcbsidebyside
+		[
+			sidebyside adapt=left,
+			bicolor,
+			colback=white,
+			colbacklower=lgray,
+			colframe=dgray,
+			colbacktitle=dgray!80!lgray,
+			boxrule=0.3mm,
+			arc=0.6mm,
+			grow to left by=-1cm,
+			grow to right by=-1cm,
+			title=#1,
+			fonttitle=\Large,
+			lefthand ratio= 0.5
+		]{#2}{#3}\quad\\
+	}
+
+	\newcommand{\imtbox}[3]{
+		\tcbsidebyside
+		[
+			sidebyside adapt=left,
+			bicolor,
+			colback=white,
+			colbacklower=white,
+			colframe=dgray,
+			colbacktitle=dgray!80!lgray,
+			boxrule=0.3mm,
+			arc=0.6mm,
+			grow to left by=-1cm,
+			grow to right by=-1cm,
+			title=#1,
+			fonttitle=\Large,
+			lefthand ratio= 0.5
+		]{#2}{#3}\quad\\
+	}
+
+	\newcommand{\sect}[1]{
+		\addtocounter{sect_ctr}{1}
+		{\noindent\Huge\text{\arabic{sect_ctr} : #1}}\\ \\
+		\setcounter{subsect_ctr}{1}
+		\setcounter{thrm_ctr}{1}
+		\setcounter{prop_ctr}{1}
+		\setcounter{def_ctr}{1}
+		\setcounter{corol_ctr}{1}
+		\setcounter{demo_ctr}{1}
+		\setcounter{exe_ctr}{1}
+		\setcounter{expl_ctr}{1}
+		\setcounter{rmq_ctr}{1}
+		\addcontentsline{toc}{sect}{\arabic{sect_ctr} : #1}
+	}
+
+	\newcommand{\subsect}[1]{
+		{\quad\noindent\huge\text{\arabic{sect_ctr}.\arabic{subsect_ctr} : #1}}\\ \\
+		\setcounter{thrm_ctr}{1}
+		\setcounter{prop_ctr}{1}
+		\setcounter{def_ctr}{1}
+		\setcounter{corol_ctr}{1}
+		\setcounter{demo_ctr}{1}
+		\setcounter{exe_ctr}{1}
+		\setcounter{expl_ctr}{1}
+		\setcounter{rmq_ctr}{1}
+		\addtocounter{subsect_ctr}{1}
+		\addcontentsline{toc}{subsect}{\arabic{sect_ctr}.\arabic{subsect_ctr} : #1}
+	}
+
+	\newcommand{\tit}[1]{
+		{\large\text{#1}}\\ \\
+	}
+
+	\makeatletter
+	\newcommand{\thrm}[2]{
+		\bbox{Théorème \arabic{sect_ctr}.\arabic{subsect_ctr}.\arabic{thrm_ctr} : \ifx&#1& \else \textit{(#1)}\fi}{#2}
+		\if@defsummary
+		\addcontentsline{toc}{other}{\arabic{sect_ctr}.\arabic{subsect_ctr}.\arabic{thrm_ctr} Théorème : \ifx&#1& \else \miniit{(#1)}\fi}
+		\fi
+		\addtocounter{thrm_ctr}{1}
+	}
+
+	\newcommand{\prop}[2]{
+		\bbox{Proposition \arabic{sect_ctr}.\arabic{subsect_ctr}.\arabic{prop_ctr} : \ifx&#1& \else \textit{(#1)}\fi}{#2}
+		\if@defsummary
+		\addcontentsline{toc}{other}{\arabic{sect_ctr}.\arabic{subsect_ctr}.\arabic{prop_ctr} Propriété : \ifx&#1& \else \miniit{(#1)}\fi}
+		\fi
+		\addtocounter{prop_ctr}{1}
+	}
+
+	\newcommand{\corol}[2]{
+		\graybox{Corollaire \arabic{sect_ctr}.\arabic{subsect_ctr}.\arabic{corol_ctr} : \ifx&#1& \else \textit{(#1)}\fi}{#2}
+		\if@defsummary
+		\addcontentsline{toc}{other}{\arabic{sect_ctr}.\arabic{subsect_ctr}.\arabic{corol_ctr} Corollaire : \ifx&#1& \else \miniit{(#1)}\fi}
+		\fi
+		\addtocounter{corol_ctr}{1}
+	}
+
+	\newcommand{\expl}[2]{
+		\graybox{Exemple \arabic{sect_ctr}.\arabic{subsect_ctr}.\arabic{expl_ctr} : \ifx&#1& \else \textit{(#1)}\fi}{#2}
+		\if@defsummary
+		\addcontentsline{toc}{other}{\arabic{sect_ctr}.\arabic{subsect_ctr}.\arabic{expl_ctr} Exemple : \ifx&#1& \else \miniit{(#1)}\fi}
+		\fi
+		\addtocounter{expl_ctr}{1}
+	}
+
+	\newcommand{\exe}[2]{
+		\graybox{Exercice \arabic{sect_ctr}.\arabic{subsect_ctr}.\arabic{exe_ctr} : \ifx&#1& \else \textit{(#1)}\fi}{#2}
+		\if@defsummary
+		\addcontentsline{toc}{other}{\arabic{sect_ctr}.\arabic{subsect_ctr}.\arabic{exe_ctr} Exercice : \ifx&#1& \else \miniit{(#1)}\fi}
+		\fi
+		\addtocounter{exe_ctr}{1}
+	}
+
+	\newcommand{\rmq}[2]{
+		\graybox{Remarque \arabic{sect_ctr}.\arabic{subsect_ctr}.\arabic{rmq_ctr} : \ifx&#1& \else \textit{(#1)}\fi}{#2}
+		\if@defsummary
+		\addcontentsline{toc}{other}{\arabic{sect_ctr}.\arabic{subsect_ctr}.\arabic{rmq_ctr} Remarque : \ifx&#1& \else \miniit{(#1)}\fi}
+		\fi
+		\addtocounter{rmq_ctr}{1}
+	}
+
+	\newcommand{\demo}[2]{
+		\rbox{Démonstration \arabic{sect_ctr}.\arabic{subsect_ctr}.\arabic{demo_ctr} : \ifx&#1& \else \textit{(#1)}\fi}{#2 \qed}
+		\if@defsummary
+		\addcontentsline{toc}{other}{\arabic{sect_ctr}.\arabic{subsect_ctr}.\arabic{demo_ctr} Démonstration : \ifx&#1& \else \miniit{(#1)}\fi}
+		\fi
+		\addtocounter{demo_ctr}{1}
+	}
+
+	\newcommand{\defn}[2]{
+		\gbox{Définition \arabic{sect_ctr}.\arabic{subsect_ctr}.\arabic{def_ctr} : \ifx&#1& \else \textit{(#1)}\fi}{#2}
+		\if@defsummary
+		\addcontentsline{toc}{other}{\arabic{sect_ctr}.\arabic{subsect_ctr}.\arabic{def_ctr} Définition : \ifx&#1& \else \miniit{(#1)}\fi}
+		\fi
+		\addtocounter{def_ctr}{1}
+	}
+}
+
+\makeatother
+
+\endinput
